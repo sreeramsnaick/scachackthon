@@ -7,7 +7,7 @@ const discussionRouter = require("./routes/discussion.js");
 const app = express();
 const mongoose = require("mongoose");
 require("dotenv").config();
-mongoose.connect("mongodb://localhost:27017/hackathonDB");
+mongoose.connect("mongodb+srv://karthikwarrier103_db_user:IyqMsTjF9eVUPN4g@jana-nayakan.4owtetz.mongodb.net/?appName=Jana-Nayakan");
 app.use(express.json());
 
 app.use(cors({
