@@ -2,8 +2,19 @@ const discussionService = require("../services/discussion.services.js");
 const jwt = require("jsonwebtoken");
 exports.createDiscussion = async (req, res) => {
     try {
-        const number = req.user.phoneNumber
-        const newDiscussion = await discussionService.createDiscussion({title: req.body.title, content: req.body.content, author: number});
+        const number = req.user.phoneNumber;
+        const { title, content, party } = req.body;
+        
+        if (!title || !content || !party) {
+            return res.status(400).json({ message: 'Title, content, and party are required' });
+        }
+        
+        const newDiscussion = await discussionService.createDiscussion({
+            title: title,
+            content: content,
+            author: number,
+            party: party
+        });
         res.status(201).json(newDiscussion);
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -52,6 +63,15 @@ exports.getUserVote = async (req, res) => {
         const userId = req.user.phoneNumber;
         const voteType = await discussionService.getUserVote(discussionId, userId);
         res.status(200).json({ voteType });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.getPartyLeaderboard = async (req, res) => {
+    try {
+        const leaderboard = await discussionService.getPartyLeaderboard();
+        res.status(200).json(leaderboard);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
