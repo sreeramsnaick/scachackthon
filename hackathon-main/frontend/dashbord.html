@@ -1,0 +1,2108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Indian Political Data Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --saffron: #FF9933;
+      --white: #FFFFFF;
+      --green: #138808;
+      --navy: #1a1f3a;
+      --charcoal: #2d3748;
+      --light-gray: #f7fafc;
+      --border-gray: #e2e8f0;
+      --text-gray: #4a5568;
+      --text-light: #718096;
+      --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, 
+        rgba(255, 153, 51, 0.08) 0%,
+        rgba(255, 255, 255, 0.95) 33%,
+        rgba(255, 255, 255, 0.95) 66%,
+        rgba(19, 136, 8, 0.08) 100%
+      );
+      color: var(--charcoal);
+      padding-bottom: 80px; /* Space for fixed bottom nav */
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Animated background elements */
+    .bg-pattern {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      opacity: 0.15;
+      pointer-events: none;
+    }
+
+    .bg-pattern::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(circle at 20% 30%, var(--saffron) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, var(--green) 0%, transparent 50%),
+        repeating-linear-gradient(
+          45deg,
+          transparent,
+          transparent 2px,
+          rgba(26, 31, 58, 0.03) 2px,
+          rgba(26, 31, 58, 0.03) 4px
+        );
+      animation: subtleMove 20s ease-in-out infinite;
+    }
+
+    /* Ashoka Chakra inspired pattern */
+    .chakra-pattern {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      top: 10%;
+      right: 5%;
+      opacity: 0.06;
+      background: radial-gradient(
+        circle,
+        transparent 40%,
+        var(--navy) 40%,
+        var(--navy) 42%,
+        transparent 42%,
+        transparent 48%,
+        var(--navy) 48%,
+        var(--navy) 50%,
+        transparent 50%
+      );
+      background-size: 20px 20px;
+      border-radius: 50%;
+      animation: rotate 30s linear infinite;
+    }
+
+    @keyframes subtleMove {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(-20px, -20px) scale(1.05); }
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Data grid overlay */
+    .data-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      opacity: 0.04;
+      background-image: 
+        linear-gradient(var(--navy) 1px, transparent 1px),
+        linear-gradient(90deg, var(--navy) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+    }
+
+    /* Header */
+    .header {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 20px rgba(26, 31, 58, 0.08);
+      padding: 1.5rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      color: var(--text-gray);
+      font-size: 0.9rem;
+    }
+
+    .btn-logout {
+      padding: 0.5rem 1.25rem;
+      background: linear-gradient(135deg, var(--saffron) 0%, #ff8c1a 100%);
+      color: var(--white);
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(255, 153, 51, 0.3);
+    }
+
+    .btn-logout:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 153, 51, 0.4);
+      background: linear-gradient(135deg, #ff8c1a 0%, var(--saffron) 100%);
+    }
+
+    /* Container */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* View Container */
+    .view {
+      display: none;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Stats View */
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 
+        0 10px 40px rgba(26, 31, 58, 0.08),
+        0 0 0 1px rgba(26, 31, 58, 0.05);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--saffron) 0%, var(--white) 50%, var(--green) 100%);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 
+        0 20px 60px rgba(26, 31, 58, 0.12),
+        0 0 0 1px rgba(26, 31, 58, 0.05);
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--saffron) 0%, var(--green) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: var(--text-gray);
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    /* Feed Container */
+    .feed-container {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-light);
+    }
+
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Post Card - YouTube Style */
+    .post-card {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 1.75rem 2rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      transition: all 0.2s ease;
+      position: relative;
+      border: 1px solid rgba(26, 31, 58, 0.06);
+    }
+
+    .post-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--saffron) 0%, var(--white) 50%, var(--green) 100%);
+      border-radius: 12px 12px 0 0;
+    }
+
+    .post-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .post-user {
+      font-weight: 600;
+      color: var(--navy);
+      font-size: 0.95rem;
+    }
+
+    .post-timestamp {
+      color: var(--text-light);
+      font-size: 0.875rem;
+      margin-left: auto;
+    }
+
+    .post-title {
+      font-size: 1.375rem;
+      font-weight: 600;
+      color: var(--charcoal);
+      margin-bottom: 0.75rem;
+      line-height: 1.5;
+      letter-spacing: -0.01em;
+    }
+
+    .post-body {
+      color: var(--text-gray);
+      line-height: 1.7;
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
+    }
+
+    .post-actions {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-gray);
+      margin-top: 1rem;
+    }
+
+    .action-button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: none;
+      border: none;
+      color: var(--text-gray);
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 0.5rem;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .action-button:hover {
+      background: var(--light-gray);
+      color: var(--navy);
+    }
+
+    .action-button.voted-up {
+      color: var(--green);
+      background: rgba(19, 136, 8, 0.1);
+    }
+
+    .action-button.voted-down {
+      color: #dc2626;
+      background: rgba(220, 38, 38, 0.1);
+    }
+
+    .action-icon {
+      font-size: 1.2rem;
+    }
+
+    .vote-count {
+      font-weight: 600;
+      min-width: 1.5rem;
+      text-align: center;
+    }
+
+    /* Vote Reasons Section */
+    .vote-reasons {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-gray);
+    }
+
+    .vote-reasons-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: none;
+      border: none;
+      color: var(--text-gray);
+      font-size: 0.875rem;
+      cursor: pointer;
+      padding: 0.5rem 0;
+      transition: color 0.2s ease;
+      font-family: inherit;
+    }
+
+    .vote-reasons-toggle:hover {
+      color: var(--navy);
+    }
+
+    .vote-reasons-content {
+      display: none;
+      margin-top: 0.75rem;
+      padding-left: 1rem;
+      border-left: 2px solid var(--border-gray);
+    }
+
+    .vote-reasons-content.expanded {
+      display: block;
+    }
+
+    .vote-reason-item {
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border-gray);
+    }
+
+    .vote-reason-item:last-child {
+      border-bottom: none;
+    }
+
+    .vote-reason-text {
+      color: var(--text-gray);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-bottom: 0.25rem;
+    }
+
+    .vote-reason-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--text-light);
+    }
+
+    .vote-reason-type {
+      padding: 0.125rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 500;
+      font-size: 0.75rem;
+    }
+
+    .vote-reason-type.upvote {
+      background: rgba(19, 136, 8, 0.1);
+      color: var(--green);
+    }
+
+    .vote-reason-type.downvote {
+      background: rgba(220, 38, 38, 0.1);
+      color: #dc2626;
+    }
+
+    /* Comments Section */
+    .comments-section {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-gray);
+    }
+
+    .comments-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: none;
+      border: none;
+      color: var(--text-gray);
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 0.5rem 0;
+      margin-bottom: 1rem;
+      transition: color 0.2s ease;
+      font-family: inherit;
+    }
+
+    .comments-toggle:hover {
+      color: var(--navy);
+    }
+
+    .comments-content {
+      display: none;
+    }
+
+    .comments-content.expanded {
+      display: block;
+    }
+
+    .comments-list {
+      margin-bottom: 1.5rem;
+    }
+
+    .comment-item {
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border-gray);
+    }
+
+    .comment-item:last-child {
+      border-bottom: none;
+    }
+
+    .comment-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .comment-author {
+      font-weight: 600;
+      color: var(--navy);
+      font-size: 0.9rem;
+    }
+
+    .comment-timestamp {
+      color: var(--text-light);
+      font-size: 0.8rem;
+      margin-left: auto;
+    }
+
+    .comment-text {
+      color: var(--text-gray);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      padding-left: 0;
+    }
+
+    .comment-form {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .comment-input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-gray);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: var(--charcoal);
+      transition: border-color 0.2s ease;
+    }
+
+    .comment-input:focus {
+      outline: none;
+      border-color: var(--saffron);
+    }
+
+    .comment-submit {
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, var(--saffron) 0%, #ff8c1a 100%);
+      color: var(--white);
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(255, 153, 51, 0.2);
+    }
+
+    .comment-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(255, 153, 51, 0.3);
+    }
+
+    .comment-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 -2px 20px rgba(26, 31, 58, 0.08);
+      z-index: 1000;
+      padding: 0.75rem 0;
+      border-top: 1px solid rgba(26, 31, 58, 0.05);
+    }
+
+    .nav-buttons {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    .nav-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      background: none;
+      border: none;
+      color: var(--text-light);
+      cursor: pointer;
+      padding: 0.5rem 1.5rem;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      font-size: 0.85rem;
+      min-width: 80px;
+    }
+
+    .nav-button:hover {
+      background: var(--light-gray);
+      color: var(--text-gray);
+    }
+
+    .nav-button.active {
+      color: var(--saffron);
+      background: rgba(255, 153, 51, 0.15);
+      font-weight: 600;
+    }
+
+    .nav-icon {
+      font-size: 1.5rem;
+    }
+
+    /* New Post Button */
+    .new-post-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn-new-post {
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, var(--saffron) 0%, #ff8c1a 100%);
+      color: var(--white);
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(255, 153, 51, 0.3);
+    }
+
+    .btn-new-post:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 153, 51, 0.4);
+      background: linear-gradient(135deg, #ff8c1a 0%, var(--saffron) 100%);
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(26, 31, 58, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 2rem;
+      max-width: 600px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(26, 31, 58, 0.2);
+      position: relative;
+      animation: fadeInUp 0.3s ease;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    .btn-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-gray);
+      padding: 0.25rem;
+      line-height: 1;
+      transition: color 0.2s ease;
+    }
+
+    .btn-close:hover {
+      color: var(--navy);
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--charcoal);
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .form-input,
+    .form-textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid var(--border-gray);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      color: var(--charcoal);
+      transition: border-color 0.2s ease;
+    }
+
+    .form-input:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--saffron);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+    }
+
+    .btn-cancel {
+      padding: 0.75rem 1.5rem;
+      background: var(--white);
+      color: var(--text-gray);
+      border: 2px solid var(--border-gray);
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-cancel:hover {
+      border-color: var(--text-gray);
+      color: var(--charcoal);
+    }
+
+    .btn-submit {
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, var(--saffron) 0%, #ff8c1a 100%);
+      color: var(--white);
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(255, 153, 51, 0.3);
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 153, 51, 0.4);
+      background: linear-gradient(135deg, #ff8c1a 0%, var(--saffron) 100%);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Reason Prompt Modal */
+    .reason-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(26, 31, 58, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 3000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .reason-modal-overlay.active {
+      display: flex;
+    }
+
+    .reason-modal-content {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(26, 31, 58, 0.2);
+      animation: fadeInUp 0.3s ease;
+    }
+
+    .reason-modal-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 1rem;
+    }
+
+    .reason-modal-text {
+      color: var(--text-gray);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+
+    .reason-input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid var(--border-gray);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      color: var(--charcoal);
+      margin-bottom: 1.5rem;
+      transition: border-color 0.2s ease;
+    }
+
+    .reason-input:focus {
+      outline: none;
+      border-color: var(--saffron);
+    }
+
+    .reason-modal-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        padding: 1.5rem 1rem;
+      }
+
+      .post-card {
+        padding: 1.25rem;
+      }
+
+      .post-title {
+        font-size: 1.1rem;
+      }
+
+      .stats-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+      }
+
+      .stat-card {
+        padding: 1.25rem;
+      }
+
+      .stat-number {
+        font-size: 2rem;
+      }
+
+      .header {
+        padding: 1rem 1.5rem;
+      }
+
+      .header-content {
+        padding: 0;
+      }
+
+      .logo {
+        font-size: 1.1rem;
+      }
+
+      .user-info {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .btn-logout {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+      }
+
+      .modal-content {
+        padding: 1.5rem;
+        width: 95%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stats-container {
+        grid-template-columns: 1fr;
+      }
+
+      .post-actions {
+        gap: 1rem;
+      }
+
+      .action-button {
+        font-size: 0.85rem;
+        padding: 0.4rem;
+      }
+
+      .nav-button {
+        padding: 0.5rem 1rem;
+        min-width: 70px;
+        font-size: 0.75rem;
+      }
+
+      .nav-icon {
+        font-size: 1.3rem;
+      }
+
+      .btn-logout span:last-child {
+        display: none;
+      }
+
+      .new-post-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .btn-new-post {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .modal-content {
+        padding: 1.25rem;
+      }
+
+      .post-card {
+        padding: 1.25rem 1.5rem;
+      }
+
+      .comment-form {
+        flex-direction: column;
+      }
+
+      .comment-submit {
+        width: 100%;
+      }
+
+      .feed-container {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-pattern"></div>
+  <div class="chakra-pattern"></div>
+  <div class="data-grid"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <div class="logo">📊 Dashboard</div>
+      <div class="user-info">
+        <span>👤</span>
+        <span id="userDisplay">Loading...</span>
+        <button class="btn-logout" id="logoutBtn">
+          <span>🚪</span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="container">
+    <!-- Stats View -->
+    <div id="statsView" class="view">
+      <div class="stats-container">
+        <div class="stat-card">
+          <div class="stat-number" id="totalPosts">0</div>
+          <div class="stat-label">Total Posts</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="totalVotes">0</div>
+          <div class="stat-label">Total Votes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="myPosts">0</div>
+          <div class="stat-label">My Posts</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="totalComments">0</div>
+          <div class="stat-label">Total Comments</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Feed View -->
+    <div id="feedView" class="view active">
+      <div class="feed-container" id="feedContainer">
+        <!-- Posts will be rendered here -->
+      </div>
+    </div>
+
+    <!-- My Posts View -->
+    <div id="myPostsView" class="view">
+      <div class="new-post-header">
+        <h2 style="font-size: 1.5rem; font-weight: 600; color: var(--navy);">My Posts</h2>
+        <button class="btn-new-post" id="newPostBtn">
+          <span>➕</span>
+          <span>New Post</span>
+        </button>
+      </div>
+      <div class="feed-container" id="myPostsContainer">
+        <!-- Filtered posts will be rendered here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Reason Prompt Modal -->
+  <div class="reason-modal-overlay" id="reasonModal">
+    <div class="reason-modal-content">
+      <h3 class="reason-modal-title" id="reasonModalTitle">Why are you voting?</h3>
+      <p class="reason-modal-text" id="reasonModalText">Please provide a brief reason for your vote. This helps create more meaningful discussions.</p>
+      <input 
+        type="text" 
+        id="reasonInput" 
+        class="reason-input" 
+        placeholder="Enter your reason..."
+        maxlength="200"
+      >
+      <div class="reason-modal-actions">
+        <button type="button" class="btn-cancel" id="cancelReasonBtn">Cancel</button>
+        <button type="button" class="btn-submit" id="submitReasonBtn">Submit Vote</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Post Modal -->
+  <div class="modal-overlay" id="newPostModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Create New Post</h3>
+        <button class="btn-close" id="closeModalBtn">×</button>
+      </div>
+      <form id="newPostForm">
+        <div class="form-group">
+          <label class="form-label" for="postTitle">Title</label>
+          <input 
+            type="text" 
+            id="postTitle" 
+            class="form-input" 
+            placeholder="Enter post title..."
+            required
+          >
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="postBody">Content</label>
+          <textarea 
+            id="postBody" 
+            class="form-textarea" 
+            placeholder="Write your post content here..."
+            required
+          ></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" id="cancelBtn">Cancel</button>
+          <button type="submit" class="btn-submit">Create Post</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <div class="nav-buttons">
+      <button class="nav-button" data-view="statsView">
+        <span class="nav-icon">📊</span>
+        <span>Stats</span>
+      </button>
+      <button class="nav-button active" data-view="feedView">
+        <span class="nav-icon">📰</span>
+        <span>Feed</span>
+      </button>
+      <button class="nav-button" data-view="myPostsView">
+        <span class="nav-icon">👤</span>
+        <span>My Posts</span>
+      </button>
+    </div>
+  </nav>
+
+  <script>
+    // Backend API Configuration
+    const API_CONFIG = {
+      BASE_URL: 'http://localhost:3000',
+      ENDPOINTS: {
+        CREATE_DISCUSSION: '/discussion/creatediscussions',
+        ADD_COMMENT: '/comments/add'
+      }
+    };
+
+    // Check authentication
+    function checkAuth() {
+      const token = localStorage.getItem('authToken');
+      const phoneNumber = localStorage.getItem('phoneNumber');
+      if (!token || !phoneNumber) {
+        window.location.href = 'Untitled-1.html';
+        return false;
+      }
+      return { token, phoneNumber };
+    }
+
+    // Get auth headers
+    function getAuthHeaders() {
+      const auth = checkAuth();
+      if (!auth) return null;
+      return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+      };
+    }
+
+    // Get logged in user from localStorage (without redirect)
+    function getLoggedInUser() {
+      const token = localStorage.getItem('authToken');
+      const phoneNumber = localStorage.getItem('phoneNumber');
+      return phoneNumber || 'Guest';
+    }
+
+    // Mock Data (using mock data since backend doesn't have GET discussions endpoint)
+    const LOGGED_IN_USER = getLoggedInUser();
+    const mockPosts = [
+      {
+        id: 1,
+        username: 'Mock User',
+        timestamp: '2 hours ago',
+        title: 'New Policy Framework Discussion',
+        body: 'The government has proposed a new framework for digital governance. This includes provisions for data protection, privacy rights, and citizen participation in policy-making processes.',
+        upvotes: 45,
+        downvotes: 3,
+        comments: 12,
+        userVote: 'up', // 'up', 'down', or null
+        upvoteReasons: [
+          { reason: 'Great initiative for digital rights', timestamp: '1 hour ago', author: 'PolicyAnalyst' },
+          { reason: 'This addresses real concerns', timestamp: '30 minutes ago', author: 'TechEnthusiast' }
+        ],
+        downvoteReasons: [
+          { reason: 'Needs more clarity on implementation', timestamp: '45 minutes ago', author: 'Skeptic' }
+        ],
+        commentsList: [
+          { id: 1, author: 'PolicyAnalyst', text: 'This is a step in the right direction. Looking forward to seeing the implementation details.', timestamp: '1 hour ago' },
+          { id: 2, author: 'DataEnthusiast', text: 'Privacy rights are crucial. Hope this gets proper funding and support.', timestamp: '50 minutes ago' },
+          { id: 3, author: 'CivicEngagement', text: 'Citizen participation is key. How will this be implemented at the grassroots level?', timestamp: '30 minutes ago' }
+        ]
+      },
+      {
+        id: 2,
+        username: 'PolicyAnalyst',
+        timestamp: '5 hours ago',
+        title: 'Economic Reforms Analysis',
+        body: 'Recent economic reforms show promising trends in GDP growth and employment rates. However, regional disparities need to be addressed to ensure inclusive development.',
+        upvotes: 38,
+        downvotes: 7,
+        comments: 8,
+        userVote: null,
+        upvoteReasons: [
+          { reason: 'Comprehensive analysis', timestamp: '4 hours ago', author: 'Economist' }
+        ],
+        downvoteReasons: [
+          { reason: 'Missing rural perspective', timestamp: '3 hours ago', author: 'RuralVoice' }
+        ],
+        commentsList: [
+          { id: 1, author: 'Economist', text: 'Good analysis. The regional disparities point is crucial.', timestamp: '4 hours ago' },
+          { id: 2, author: 'RuralVoice', text: 'What about the impact on small businesses?', timestamp: '3 hours ago' }
+        ]
+      },
+      {
+        id: 3,
+        username: 'DataEnthusiast',
+        timestamp: '1 day ago',
+        title: 'Healthcare Infrastructure Update',
+        body: 'The new healthcare infrastructure initiative aims to improve access to quality medical services in rural areas. This includes setting up new clinics and upgrading existing facilities.',
+        upvotes: 52,
+        downvotes: 2,
+        comments: 15,
+        userVote: null,
+        upvoteReasons: [],
+        downvoteReasons: [],
+        commentsList: []
+      },
+      {
+        id: 4,
+        username: 'Mock User',
+        timestamp: '2 days ago',
+        title: 'Education Policy Recommendations',
+        body: 'Based on recent data analysis, here are key recommendations for improving educational outcomes: increased funding for public schools, teacher training programs, and digital learning infrastructure.',
+        upvotes: 67,
+        downvotes: 4,
+        comments: 23,
+        userVote: 'up',
+        upvoteReasons: [],
+        downvoteReasons: [],
+        commentsList: []
+      },
+      {
+        id: 5,
+        username: 'CivicEngagement',
+        timestamp: '3 days ago',
+        title: 'Environmental Conservation Measures',
+        body: 'New environmental policies focus on renewable energy adoption, waste management, and forest conservation. Public participation is crucial for successful implementation.',
+        upvotes: 41,
+        downvotes: 5,
+        comments: 9,
+        userVote: null,
+        upvoteReasons: [],
+        downvoteReasons: [],
+        commentsList: []
+      },
+      {
+        id: 6,
+        username: 'TechPolicy',
+        timestamp: '4 days ago',
+        title: 'Digital Rights and Privacy',
+        body: 'Discussion on balancing national security concerns with individual privacy rights in the digital age. Stakeholder consultations are ongoing.',
+        upvotes: 29,
+        downvotes: 8,
+        comments: 11,
+        userVote: 'down',
+        upvoteReasons: [],
+        downvoteReasons: [],
+        commentsList: []
+      },
+      {
+        id: 7,
+        username: 'Mock User',
+        timestamp: '5 days ago',
+        title: 'Infrastructure Development Projects',
+        body: 'Multiple infrastructure projects are underway across different states. These include road networks, railway expansion, and airport modernization initiatives.',
+        upvotes: 58,
+        downvotes: 3,
+        comments: 18,
+        userVote: 'up',
+        upvoteReasons: [],
+        downvoteReasons: [],
+        commentsList: []
+      },
+      {
+        id: 8,
+        username: 'RuralDevelopment',
+        timestamp: '1 week ago',
+        title: 'Rural Employment Programs',
+        body: 'New employment generation programs target rural youth and women. Skill development and entrepreneurship support are key components of these initiatives.',
+        upvotes: 34,
+        downvotes: 6,
+        comments: 7,
+        userVote: null,
+        upvoteReasons: [],
+        downvoteReasons: [],
+        commentsList: []
+      },
+      {
+        id: 9,
+        username: 'UrbanPlanning',
+        timestamp: '1 week ago',
+        title: 'Smart City Initiatives',
+        body: 'Smart city projects focus on improving urban infrastructure, transportation systems, and digital connectivity. Citizen feedback is being incorporated into planning.',
+        upvotes: 48,
+        downvotes: 4,
+        comments: 14,
+        userVote: null,
+        upvoteReasons: [],
+        downvoteReasons: [],
+        commentsList: []
+      },
+      {
+        id: 10,
+        username: 'Mock User',
+        timestamp: '1 week ago',
+        title: 'Agricultural Reforms Summary',
+        body: 'Recent agricultural reforms aim to improve market access for farmers, reduce middlemen, and provide better price discovery mechanisms. Implementation status varies by state.',
+        upvotes: 43,
+        downvotes: 9,
+        comments: 16,
+        userVote: null,
+        upvoteReasons: [],
+        downvoteReasons: [],
+        commentsList: []
+      }
+    ];
+
+    // State Management
+    let posts = [...mockPosts];
+    let currentView = 'feedView';
+    let nextPostId = Math.max(...mockPosts.map(p => p.id)) + 1;
+    let nextCommentId = Math.max(...mockPosts.flatMap(p => (p.commentsList || []).map(c => c.id))) + 1;
+    let pendingVote = null; // { postId, voteType }
+
+    // Initialize App
+    function init() {
+      // Check authentication first
+      const auth = checkAuth();
+      if (!auth) {
+        return; // Will redirect to login
+      }
+      
+      // Update user display
+      const userDisplay = document.getElementById('userDisplay');
+      if (userDisplay) {
+        userDisplay.textContent = auth.phoneNumber || 'User';
+      }
+      
+      setupNavigation();
+      setupLogout();
+      setupNewPost();
+      setupReasonModal();
+      renderFeed();
+      renderMyPosts();
+      updateStats();
+      showView('feedView');
+    }
+
+    // Setup Reason Modal
+    function setupReasonModal() {
+      const cancelBtn = document.getElementById('cancelReasonBtn');
+      const submitBtn = document.getElementById('submitReasonBtn');
+      const reasonInput = document.getElementById('reasonInput');
+      const modal = document.getElementById('reasonModal');
+
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', closeReasonModal);
+      }
+
+      if (submitBtn) {
+        submitBtn.addEventListener('click', submitVoteWithReason);
+      }
+
+      if (reasonInput) {
+        reasonInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            submitVoteWithReason();
+          }
+        });
+      }
+
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            closeReasonModal();
+          }
+        });
+      }
+    }
+
+    // Open Reason Modal
+    function openReasonModal(postId, voteType) {
+      pendingVote = { postId, voteType };
+      const modal = document.getElementById('reasonModal');
+      const title = document.getElementById('reasonModalTitle');
+      const text = document.getElementById('reasonModalText');
+      const input = document.getElementById('reasonInput');
+
+      if (modal && title && text && input) {
+        title.textContent = voteType === 'up' ? 'Why are you upvoting?' : 'Why are you downvoting?';
+        text.textContent = voteType === 'up' 
+          ? 'Please provide a brief reason for your upvote. This helps create more meaningful discussions.'
+          : 'Please provide a brief reason for your downvote. Constructive feedback helps improve the discussion.';
+        input.value = '';
+        modal.classList.add('active');
+        input.focus();
+      }
+    }
+
+    // Close Reason Modal
+    function closeReasonModal() {
+      const modal = document.getElementById('reasonModal');
+      const input = document.getElementById('reasonInput');
+      if (modal) {
+        modal.classList.remove('active');
+      }
+      if (input) {
+        input.value = '';
+      }
+      pendingVote = null;
+    }
+
+    // Submit Vote With Reason
+    function submitVoteWithReason() {
+      if (!pendingVote) return;
+
+      const input = document.getElementById('reasonInput');
+      const reason = input ? input.value.trim() : '';
+
+      if (!reason) {
+        alert('Please provide a reason for your vote.');
+        return;
+      }
+
+      const { postId, voteType } = pendingVote;
+      const post = posts.find(p => p.id === postId);
+      if (!post) {
+        closeReasonModal();
+        return;
+      }
+
+      // Initialize arrays if they don't exist
+      if (!post.upvoteReasons) post.upvoteReasons = [];
+      if (!post.downvoteReasons) post.downvoteReasons = [];
+
+      // Add reason
+      const reasonObj = {
+        reason: reason,
+        timestamp: 'Just now',
+        author: LOGGED_IN_USER
+      };
+
+      if (voteType === 'up') {
+        post.upvoteReasons.unshift(reasonObj);
+      } else {
+        post.downvoteReasons.unshift(reasonObj);
+      }
+
+      // Process the vote
+      processVote(postId, voteType);
+      closeReasonModal();
+    }
+
+    // Navigation Setup
+    function setupNavigation() {
+      const navButtons = document.querySelectorAll('.nav-button');
+      navButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const viewId = button.getAttribute('data-view');
+          showView(viewId);
+        });
+      });
+    }
+
+    // Logout Setup
+    function setupLogout() {
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
+      }
+    }
+
+    // Logout Handler
+    function handleLogout() {
+      // Clear all auth data
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('phoneNumber');
+        localStorage.removeItem('loggedInUser');
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('user');
+      }
+      // Redirect to login page
+      window.location.href = 'Untitled-1.html';
+    }
+
+    // New Post Setup
+    function setupNewPost() {
+      const newPostBtn = document.getElementById('newPostBtn');
+      const closeModalBtn = document.getElementById('closeModalBtn');
+      const cancelBtn = document.getElementById('cancelBtn');
+      const newPostForm = document.getElementById('newPostForm');
+      const modal = document.getElementById('newPostModal');
+
+      if (newPostBtn) {
+        newPostBtn.addEventListener('click', () => openNewPostModal());
+      }
+
+      if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', () => closeNewPostModal());
+      }
+
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => closeNewPostModal());
+      }
+
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            closeNewPostModal();
+          }
+        });
+      }
+
+      if (newPostForm) {
+        newPostForm.addEventListener('submit', handleNewPostSubmit);
+      }
+    }
+
+    // Open New Post Modal
+    function openNewPostModal() {
+      const modal = document.getElementById('newPostModal');
+      if (modal) {
+        modal.classList.add('active');
+        document.getElementById('postTitle').focus();
+      }
+    }
+
+    // Close New Post Modal
+    function closeNewPostModal() {
+      const modal = document.getElementById('newPostModal');
+      const form = document.getElementById('newPostForm');
+      if (modal) {
+        modal.classList.remove('active');
+      }
+      if (form) {
+        form.reset();
+      }
+    }
+
+    // Handle New Post Submit
+    async handleNewPostSubmit(e) {
+      e.preventDefault();
+      
+      const titleInput = document.getElementById('postTitle');
+      const bodyInput = document.getElementById('postBody');
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+
+      const title = titleInput.value.trim();
+      const body = bodyInput.value.trim();
+
+      // Validation
+      if (!title || !body) {
+        alert('Please fill in both title and content fields.');
+        return;
+      }
+
+      // Disable submit button
+      submitBtn.disabled = true;
+
+      // Get auth headers
+      const headers = getAuthHeaders();
+      if (!headers) {
+        window.location.href = 'Untitled-1.html';
+        return;
+      }
+
+      // Create discussion via backend API
+      try {
+        const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CREATE_DISCUSSION}`, {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify({
+            title: title,
+            content: body
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Create new post object from backend response
+          const auth = checkAuth();
+          const newPost = {
+            id: data._id || nextPostId++,
+            username: auth.phoneNumber || LOGGED_IN_USER,
+            timestamp: 'Just now',
+            title: data.title || title,
+            body: data.content || body,
+            upvotes: 0,
+            downvotes: 0,
+            comments: 0,
+            userVote: null,
+            upvoteReasons: [],
+            downvoteReasons: [],
+            commentsList: []
+          };
+
+          // Add to posts array (at the beginning for newest first)
+          posts.unshift(newPost);
+
+      // Update all views
+      renderFeed();
+      renderMyPosts();
+      updateStats();
+
+      // Close modal and reset form
+      closeNewPostModal();
+
+      // Switch to My Posts view to see the new post
+      showView('myPostsView');
+      
+      // Show success message
+      const successMsg = document.createElement('div');
+      successMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; padding: 1rem 1.5rem; background: rgba(19, 136, 8, 0.1); color: #138808; border: 1px solid rgba(19, 136, 8, 0.2); border-radius: 8px; z-index: 10000; font-weight: 500;';
+      successMsg.textContent = 'Discussion created successfully!';
+      document.body.appendChild(successMsg);
+      setTimeout(() => successMsg.remove(), 3000);
+        } else {
+          alert('Failed to create discussion: ' + (data.message || data.error || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Create discussion error:', error);
+        alert('Unable to connect to server. Please try again later.');
+      }
+
+      // Re-enable submit button
+      submitBtn.disabled = false;
+    }
+
+    // Show View
+    function showView(viewId) {
+      // Hide all views
+      document.querySelectorAll('.view').forEach(view => {
+        view.classList.remove('active');
+      });
+
+      // Show selected view
+      const selectedView = document.getElementById(viewId);
+      if (selectedView) {
+        selectedView.classList.add('active');
+      }
+
+      // Update nav buttons
+      document.querySelectorAll('.nav-button').forEach(button => {
+        button.classList.remove('active');
+        if (button.getAttribute('data-view') === viewId) {
+          button.classList.add('active');
+        }
+      });
+
+      currentView = viewId;
+
+      // Update stats when switching to stats view
+      if (viewId === 'statsView') {
+        updateStats();
+      }
+
+      // Re-render My Posts view to ensure it's up to date
+      if (viewId === 'myPostsView') {
+        renderMyPosts();
+      }
+    }
+
+    // Render Post Card
+    function renderPostCard(post) {
+      const upvoteClass = post.userVote === 'up' ? 'voted-up' : '';
+      const downvoteClass = post.userVote === 'down' ? 'voted-down' : '';
+      
+      // Initialize arrays if they don't exist
+      if (!post.upvoteReasons) post.upvoteReasons = [];
+      if (!post.downvoteReasons) post.downvoteReasons = [];
+      if (!post.commentsList) post.commentsList = [];
+
+      const allReasons = [...post.upvoteReasons, ...post.downvoteReasons];
+      const hasReasons = allReasons.length > 0;
+      const hasComments = post.commentsList && post.commentsList.length > 0;
+
+      const card = document.createElement('div');
+      card.className = 'post-card';
+      card.setAttribute('data-post-id', post.id);
+      
+      // Build vote reasons HTML
+      let reasonsHTML = '';
+      if (hasReasons) {
+        // Combine reasons with type indicator
+        const reasonsWithType = [
+          ...post.upvoteReasons.map(r => ({ ...r, type: 'upvote' })),
+          ...post.downvoteReasons.map(r => ({ ...r, type: 'downvote' }))
+        ].sort((a, b) => {
+          // Sort by timestamp (most recent first) - simplified
+          return 0;
+        });
+
+        reasonsHTML = `
+          <div class="vote-reasons">
+            <button class="vote-reasons-toggle" data-post-id="${post.id}">
+              <span>▶</span>
+              <span>View vote reasons (${allReasons.length})</span>
+            </button>
+            <div class="vote-reasons-content" id="reasons-${post.id}">
+              ${reasonsWithType.map((r) => `
+                <div class="vote-reason-item">
+                  <div class="vote-reason-text">${escapeHtml(r.reason)}</div>
+                  <div class="vote-reason-meta">
+                    <span class="vote-reason-type ${r.type}">
+                      ${r.type === 'upvote' ? '⬆️ Upvote' : '⬇️ Downvote'}
+                    </span>
+                    <span>${escapeHtml(r.author)}</span>
+                    <span>•</span>
+                    <span>${escapeHtml(r.timestamp)}</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      // Build comments HTML
+      let commentsHTML = '';
+      if (hasComments) {
+        commentsHTML = `
+          <div class="comments-list">
+            ${post.commentsList.map(comment => `
+              <div class="comment-item">
+                <div class="comment-header">
+                  <span class="comment-author">${escapeHtml(comment.author)}</span>
+                  <span class="comment-timestamp">${escapeHtml(comment.timestamp)}</span>
+                </div>
+                <div class="comment-text">${escapeHtml(comment.text)}</div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      card.innerHTML = `
+        <div class="post-header">
+          <div class="post-user">${escapeHtml(post.username)}</div>
+          <div class="post-timestamp">${escapeHtml(post.timestamp)}</div>
+        </div>
+        <div class="post-title">${escapeHtml(post.title)}</div>
+        <div class="post-body">${escapeHtml(post.body)}</div>
+        <div class="post-actions">
+          <button class="action-button ${upvoteClass}" data-action="upvote" data-post-id="${post.id}">
+            <span class="action-icon">⬆️</span>
+            <span class="vote-count">${post.upvotes}</span>
+          </button>
+          <button class="action-button ${downvoteClass}" data-action="downvote" data-post-id="${post.id}">
+            <span class="action-icon">⬇️</span>
+            <span class="vote-count">${post.downvotes}</span>
+          </button>
+          <button class="action-button comments-toggle-btn" data-post-id="${post.id}">
+            <span class="action-icon">💬</span>
+            <span>${post.comments || 0} Comments</span>
+          </button>
+        </div>
+        ${reasonsHTML}
+        <div class="comments-section">
+          <button class="comments-toggle" data-post-id="${post.id}">
+            <span>${hasComments ? '▼' : '▶'}</span>
+            <span>${post.comments || 0} Comments</span>
+          </button>
+          <div class="comments-content" id="comments-${post.id}">
+            ${commentsHTML}
+            <form class="comment-form" data-post-id="${post.id}">
+              <input 
+                type="text" 
+                class="comment-input" 
+                placeholder="Add a comment..."
+                required
+              >
+              <button type="submit" class="comment-submit">Post</button>
+            </form>
+          </div>
+        </div>
+      `;
+
+      // Attach event listeners
+      const upvoteBtn = card.querySelector('[data-action="upvote"]');
+      const downvoteBtn = card.querySelector('[data-action="downvote"]');
+      const commentsToggle = card.querySelector('.comments-toggle');
+      const reasonsToggle = card.querySelector('.vote-reasons-toggle');
+      const commentForm = card.querySelector('.comment-form');
+      
+      if (upvoteBtn) {
+        upvoteBtn.addEventListener('click', () => handleVote(post.id, 'up'));
+      }
+      if (downvoteBtn) {
+        downvoteBtn.addEventListener('click', () => handleVote(post.id, 'down'));
+      }
+      if (commentsToggle) {
+        commentsToggle.addEventListener('click', () => toggleComments(post.id));
+      }
+      if (reasonsToggle) {
+        reasonsToggle.addEventListener('click', () => toggleReasons(post.id));
+      }
+      if (commentForm) {
+        commentForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          handleAddComment(post.id, e.target);
+        });
+      }
+
+      return card;
+    }
+
+    // Toggle Comments
+    function toggleComments(postId) {
+      const commentsContent = document.getElementById(`comments-${postId}`);
+      const toggle = document.querySelector(`.comments-toggle[data-post-id="${postId}"]`);
+      
+      if (commentsContent && toggle) {
+        const isExpanded = commentsContent.classList.contains('expanded');
+        commentsContent.classList.toggle('expanded');
+        
+        // Update toggle icon
+        const icon = toggle.querySelector('span:first-child');
+        if (icon) {
+          icon.textContent = isExpanded ? '▶' : '▼';
+        }
+      }
+    }
+
+    // Toggle Reasons
+    function toggleReasons(postId) {
+      const reasonsContent = document.getElementById(`reasons-${postId}`);
+      const toggle = document.querySelector(`.vote-reasons-toggle[data-post-id="${postId}"]`);
+      
+      if (reasonsContent && toggle) {
+        const isExpanded = reasonsContent.classList.contains('expanded');
+        reasonsContent.classList.toggle('expanded');
+        
+        // Update toggle icon
+        const icon = toggle.querySelector('span:first-child');
+        if (icon) {
+          icon.textContent = isExpanded ? '▶' : '▼';
+        }
+      }
+    }
+
+    // Handle Add Comment
+    async function handleAddComment(postId, form) {
+      const input = form.querySelector('.comment-input');
+      const commentText = input ? input.value.trim() : '';
+
+      if (!commentText) {
+        return;
+      }
+
+      const post = posts.find(p => p.id === postId);
+      if (!post) return;
+
+      // Get auth headers
+      const headers = getAuthHeaders();
+      if (!headers) {
+        window.location.href = 'Untitled-1.html';
+        return;
+      }
+
+      // Disable input and submit button
+      const submitBtn = form.querySelector('.comment-submit');
+      if (input) input.disabled = true;
+      if (submitBtn) submitBtn.disabled = true;
+      if (submitBtn) submitBtn.textContent = 'Posting...';
+
+      try {
+        // Add comment via backend API
+        const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ADD_COMMENT}/${postId}`, {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify({
+            content: commentText
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Initialize commentsList if it doesn't exist
+          if (!post.commentsList) post.commentsList = [];
+
+          // Create new comment from backend response
+          const auth = checkAuth();
+          const newComment = {
+            id: data._id || nextCommentId++,
+            author: auth.phoneNumber || LOGGED_IN_USER,
+            text: data.content || commentText,
+            timestamp: 'Just now'
+          };
+
+          // Add comment to local array
+          post.commentsList.push(newComment);
+          post.comments = (post.comments || 0) + 1;
+
+          // Clear input
+          if (input) input.value = '';
+
+          // Re-render current view
+          if (currentView === 'feedView') {
+            renderFeed();
+          } else if (currentView === 'myPostsView') {
+            renderMyPosts();
+          }
+
+          // Update stats
+          updateStats();
+
+          // Auto-expand comments section
+          setTimeout(() => {
+            const commentsContent = document.getElementById(`comments-${postId}`);
+            if (commentsContent && !commentsContent.classList.contains('expanded')) {
+              toggleComments(postId);
+            }
+          }, 100);
+        } else {
+          alert('Failed to add comment: ' + (data.message || data.error || 'Unknown error'));
+          if (input) input.disabled = false;
+          if (submitBtn) submitBtn.disabled = false;
+          if (submitBtn) submitBtn.textContent = 'Post';
+        }
+      } catch (error) {
+        console.error('Add comment error:', error);
+        alert('Unable to connect to server. Please try again later.');
+        if (input) input.disabled = false;
+        if (submitBtn) submitBtn.disabled = false;
+        if (submitBtn) submitBtn.textContent = 'Post';
+      }
+    }
+
+    // Escape HTML to prevent XSS
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Render Feed
+    function renderFeed() {
+      const container = document.getElementById('feedContainer');
+      container.innerHTML = '';
+      
+      if (posts.length === 0) {
+        const emptyState = document.createElement('div');
+        emptyState.className = 'empty-state';
+        emptyState.innerHTML = `
+          <div class="empty-state-icon">📭</div>
+          <div>No posts available</div>
+        `;
+        container.appendChild(emptyState);
+      } else {
+        posts.forEach(post => {
+          container.appendChild(renderPostCard(post));
+        });
+      }
+    }
+
+    // Render My Posts
+    function renderMyPosts() {
+      const container = document.getElementById('myPostsContainer');
+      container.innerHTML = '';
+      
+      const myPosts = posts.filter(post => post.username === LOGGED_IN_USER);
+      
+      if (myPosts.length === 0) {
+        const emptyState = document.createElement('div');
+        emptyState.className = 'empty-state';
+        emptyState.innerHTML = `
+          <div class="empty-state-icon">📝</div>
+          <div>You haven't posted anything yet</div>
+        `;
+        container.appendChild(emptyState);
+      } else {
+        myPosts.forEach(post => {
+          container.appendChild(renderPostCard(post));
+        });
+      }
+    }
+
+    // Handle Vote (opens reason modal)
+    function handleVote(postId, voteType) {
+      const post = posts.find(p => p.id === postId);
+      if (!post) return;
+
+      const previousVote = post.userVote;
+
+      // If clicking the same button, remove vote without reason
+      if (previousVote === voteType) {
+        processVote(postId, voteType, true); // true = remove vote
+        return;
+      }
+
+      // Otherwise, prompt for reason
+      openReasonModal(postId, voteType);
+    }
+
+    // Process Vote (internal function)
+    function processVote(postId, voteType, removeVote = false) {
+      const post = posts.find(p => p.id === postId);
+      if (!post) return;
+
+      const previousVote = post.userVote;
+
+      if (removeVote || previousVote === voteType) {
+        // Remove vote
+        post.userVote = null;
+        if (voteType === 'up') {
+          post.upvotes = Math.max(0, post.upvotes - 1);
+        } else {
+          post.downvotes = Math.max(0, post.downvotes - 1);
+        }
+      } else {
+        // Remove previous vote if any
+        if (previousVote === 'up') {
+          post.upvotes = Math.max(0, post.upvotes - 1);
+        } else if (previousVote === 'down') {
+          post.downvotes = Math.max(0, post.downvotes - 1);
+        }
+
+        // Add new vote
+        post.userVote = voteType;
+        if (voteType === 'up') {
+          post.upvotes += 1;
+        } else {
+          post.downvotes += 1;
+        }
+      }
+
+      // Re-render current view
+      if (currentView === 'feedView') {
+        renderFeed();
+      } else if (currentView === 'myPostsView') {
+        renderMyPosts();
+      } else if (currentView === 'statsView') {
+        updateStats();
+      }
+
+      // Update stats
+      updateStats();
+    }
+
+    // Update Stats
+    function updateStats() {
+      const totalPosts = posts.length;
+      const totalVotes = posts.reduce((sum, post) => sum + (post.upvotes || 0) + (post.downvotes || 0), 0);
+      const myPostsCount = posts.filter(post => post.username === LOGGED_IN_USER).length;
+      const totalComments = posts.reduce((sum, post) => {
+        if (post.commentsList && Array.isArray(post.commentsList)) {
+          return sum + post.commentsList.length;
+        }
+        return sum + (post.comments || 0);
+      }, 0);
+
+      const totalPostsEl = document.getElementById('totalPosts');
+      const totalVotesEl = document.getElementById('totalVotes');
+      const myPostsEl = document.getElementById('myPosts');
+      const totalCommentsEl = document.getElementById('totalComments');
+
+      if (totalPostsEl) totalPostsEl.textContent = totalPosts;
+      if (totalVotesEl) totalVotesEl.textContent = totalVotes;
+      if (myPostsEl) myPostsEl.textContent = myPostsCount;
+      if (totalCommentsEl) totalCommentsEl.textContent = totalComments;
+    }
+
+    // Initialize on load
+    init();
+  </script>
+</body>
+</html>

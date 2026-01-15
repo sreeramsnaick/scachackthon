@@ -1,0 +1,25 @@
+const express = require("express");
+const cors = require("cors");
+const userRouter = require("./routes/user.js");
+const authRouter = require("./routes/auth.js");
+const commentRouter = require("./routes/comments.js");
+const discussionRouter = require("./routes/discussion.js");
+const app = express();
+const mongoose = require("mongoose");
+require("dotenv").config();
+mongoose.connect("mongodb://localhost:27017/hackathonDB");
+app.use(express.json());
+
+app.use(cors({
+    origin: "*",
+    credentials: true
+}));
+app.use("/", userRouter);
+app.use("/auth", authRouter);
+app.use("/discussion", discussionRouter);
+app.use("/comments", commentRouter);
+app.listen(3000, (error)=> {
+    if (error) {
+        console.error(error);
+    }
+})
