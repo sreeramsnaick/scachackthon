@@ -518,6 +518,176 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* Discussions Section */
+    .discussions-section {
+      padding: 4rem 0;
+      animation: fadeIn 1s ease-out 0.9s both;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid var(--border-gray);
+      padding-bottom: 1rem;
+    }
+
+    .tab-button {
+      padding: 0.75rem 2rem;
+      background: transparent;
+      color: var(--text-gray);
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .tab-button:hover {
+      color: var(--saffron);
+      background: rgba(255, 153, 51, 0.1);
+    }
+
+    .tab-button.active {
+      color: var(--saffron);
+      background: rgba(255, 153, 51, 0.1);
+    }
+
+    .tab-button.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1rem;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--saffron) 0%, var(--green) 100%);
+      border-radius: 2px 2px 0 0;
+    }
+
+    .discussions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .discussion-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 
+        0 10px 40px rgba(26, 31, 58, 0.08),
+        0 0 0 1px rgba(26, 31, 58, 0.05);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .discussion-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--saffron) 0%, var(--white) 50%, var(--green) 100%);
+    }
+
+    .discussion-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 
+        0 20px 60px rgba(26, 31, 58, 0.12),
+        0 0 0 1px rgba(26, 31, 58, 0.05);
+    }
+
+    .discussion-card h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 0.75rem;
+      line-height: 1.4;
+    }
+
+    .discussion-card p {
+      color: var(--text-gray);
+      line-height: 1.6;
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .discussion-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-gray);
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+
+    .discussion-author {
+      font-weight: 500;
+      color: var(--text-gray);
+    }
+
+    .discussion-date {
+      color: var(--text-light);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-gray);
+    }
+
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--navy);
+    }
+
+    .empty-state p {
+      color: var(--text-light);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-gray);
+      font-size: 1.1rem;
+    }
+
+    @media (max-width: 768px) {
+      .discussions-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tabs {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .tab-button {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
@@ -633,6 +803,23 @@
       </div>
     </section>
 
+    <!-- Discussions Section -->
+    <section class="discussions-section" id="discussions">
+      <h2 class="section-title">Community Discussions</h2>
+      <p class="section-subtitle">
+        Join the conversation and share your insights on Indian politics
+      </p>
+      
+      <div class="tabs">
+        <button class="tab-button active" data-tab="feeds">Feeds</button>
+        <button class="tab-button" data-tab="my-posts">My Posts</button>
+      </div>
+
+      <div id="discussions-container">
+        <div class="loading">Loading discussions...</div>
+      </div>
+    </section>
+
     <!-- CTA Section -->
     <section class="cta">
       <div class="cta-content">
@@ -650,5 +837,147 @@
   <footer>
     <p>&copy; 2024 Indian Political Data Intelligence Platform. All rights reserved.</p>
   </footer>
+
+  <script>
+    const API_BASE_URL = 'http://localhost:3000';
+    let currentTab = 'feeds';
+
+    // Tab switching functionality
+    document.querySelectorAll('.tab-button').forEach(button => {
+      button.addEventListener('click', () => {
+        // Update active tab
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        
+        // Update current tab
+        currentTab = button.getAttribute('data-tab');
+        
+        // Load discussions for the selected tab
+        loadDiscussions();
+      });
+    });
+
+    // Format date
+    function formatDate(dateString) {
+      if (!dateString) return 'Recently';
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffInSeconds = Math.floor((now - date) / 1000);
+      
+      if (diffInSeconds < 60) return 'Just now';
+      if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+      if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+      if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+      
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    // Render discussions
+    function renderDiscussions(discussions) {
+      const container = document.getElementById('discussions-container');
+      
+      if (!discussions || discussions.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">💬</div>
+            <h3>No discussions yet</h3>
+            <p>${currentTab === 'my-posts' ? 'You haven\'t created any discussions yet.' : 'Be the first to start a discussion!'}</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="discussions-grid">
+          ${discussions.map(discussion => `
+            <div class="discussion-card">
+              <h3>${escapeHtml(discussion.title)}</h3>
+              <p>${escapeHtml(discussion.content)}</p>
+              <div class="discussion-meta">
+                <span class="discussion-author">📱 ${escapeHtml(discussion.author)}</span>
+                <span class="discussion-date">${formatDate(discussion.createdAt)}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // Escape HTML to prevent XSS
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Load discussions based on current tab
+    async function loadDiscussions() {
+      const container = document.getElementById('discussions-container');
+      container.innerHTML = '<div class="loading">Loading discussions...</div>';
+
+      try {
+        let url = `${API_BASE_URL}/discussion/all`;
+        
+        if (currentTab === 'my-posts') {
+          const token = localStorage.getItem('authToken');
+          if (!token) {
+            container.innerHTML = `
+              <div class="empty-state">
+                <div class="empty-state-icon">🔒</div>
+                <h3>Authentication Required</h3>
+                <p>Please sign in to view your posts.</p>
+                <a href="Untitled-1.html" class="btn-primary" style="margin-top: 1rem; display: inline-block;">Sign In</a>
+              </div>
+            `;
+            return;
+          }
+          url = `${API_BASE_URL}/discussion/my-posts`;
+        }
+
+        const headers = {};
+        if (currentTab === 'my-posts') {
+          const token = localStorage.getItem('authToken');
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: headers
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            container.innerHTML = `
+              <div class="empty-state">
+                <div class="empty-state-icon">🔒</div>
+                <h3>Authentication Required</h3>
+                <p>Please sign in to view your posts.</p>
+                <a href="Untitled-1.html" class="btn-primary" style="margin-top: 1rem; display: inline-block;">Sign In</a>
+              </div>
+            `;
+            return;
+          }
+          throw new Error('Failed to load discussions');
+        }
+
+        const discussions = await response.json();
+        renderDiscussions(discussions);
+      } catch (error) {
+        console.error('Error loading discussions:', error);
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">⚠️</div>
+            <h3>Error Loading Discussions</h3>
+            <p>${error.message}. Please try again later.</p>
+          </div>
+        `;
+      }
+    }
+
+    // Load discussions on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      loadDiscussions();
+    });
+  </script>
 </body>
 </html>
